@@ -192,7 +192,7 @@
 
                             <!-- 지역 및 해상도 -->
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="region" class="form-label fw-bold">
                                             <i class="fas fa-map-marker-alt text-primary"></i>
@@ -206,41 +206,34 @@
                                                required>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label for="resolution" class="form-label fw-bold">
+                                        <label for="resolutionWidth" class="form-label fw-bold">
                                             <i class="fas fa-desktop text-primary"></i>
-                                            해상도
+                                            가로(폭) <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-select" id="resolution" th:field="*{resolution}">
-                                            <option value="">해상도 선택</option>
-                                            <option value="1920x1080">1920 x 1080 (FHD)</option>
-                                            <option value="1366x768">1366 x 768 (HD)</option>
-                                            <option value="1280x720">1280 x 720 (HD Ready)</option>
-                                            <option value="3840x2160">3840 x 2160 (4K UHD)</option>
-                                            <option value="2560x1440">2560 x 1440 (QHD)</option>
-                                            <option value="1440x900">1440 x 900 (WXGA+)</option>
-                                            <option value="1024x768">1024 x 768 (XGA)</option>
-                                            <option value="custom">사용자 정의</option>
-                                        </select>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="resolutionWidth" 
+                                               th:field="*{resolutionWidth}"
+                                               placeholder="1920"
+                                               min="1"
+                                               required>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- 사용자 정의 해상도 -->
-                            <div id="customResolution" class="mb-3 d-none">
-                                <div class="row">
-                                    <div class="col-md-6">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="resolutionHeight" class="form-label fw-bold">
+                                            <i class="fas fa-desktop text-primary"></i>
+                                            세로(높이) <span class="text-danger">*</span>
+                                        </label>
                                         <input type="number" 
-                                               id="customWidth" 
                                                class="form-control" 
-                                               placeholder="너비 (px)">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="number" 
-                                               id="customHeight" 
-                                               class="form-control" 
-                                               placeholder="높이 (px)">
+                                               id="resolutionHeight" 
+                                               th:field="*{resolutionHeight}"
+                                               placeholder="1080"
+                                               min="1"
+                                               required>
                                     </div>
                                 </div>
                             </div>
@@ -257,22 +250,24 @@
                                             </button>
                                         </div>
                                         <div class="card-body">
-                                            <div class="row">
+                                            <label for="weatherLocation" class="form-label">주소</label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="weatherLocation" 
+                                                   placeholder="서울특별시 강남구"
+                                                   readonly>
+                                            <div class="row mt-2">
                                                 <div class="col-6">
-                                                    <label for="weatherNx" class="form-label">격자 X</label>
-                                                    <input type="number" 
+                                                    <input type="hidden" 
                                                            class="form-control" 
                                                            id="weatherNx" 
-                                                           th:field="*{weatherNx}"
-                                                           placeholder="60">
+                                                           th:field="*{weatherNx}">
                                                 </div>
                                                 <div class="col-6">
-                                                    <label for="weatherNy" class="form-label">격자 Y</label>
-                                                    <input type="number" 
+                                                    <input type="hidden" 
                                                            class="form-control" 
                                                            id="weatherNy" 
-                                                           th:field="*{weatherNy}"
-                                                           placeholder="127">
+                                                           th:field="*{weatherNy}">
                                                 </div>
                                             </div>
                                         </div>
@@ -296,6 +291,36 @@
                                                    th:field="*{airStationName}"
                                                    placeholder="중구">
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 서비스 기간 설정 -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="serviceStartDate" class="form-label fw-bold">
+                                            <i class="fas fa-calendar-plus text-success"></i>
+                                            서비스 시작일
+                                        </label>
+                                        <input type="datetime-local" 
+                                               class="form-control" 
+                                               id="serviceStartDate" 
+                                               th:field="*{serviceStartDate}">
+                                        <div class="form-text">비어있으면 즉시 시작</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="serviceEndDate" class="form-label fw-bold">
+                                            <i class="fas fa-calendar-times text-danger"></i>
+                                            서비스 종료일
+                                        </label>
+                                        <input type="datetime-local" 
+                                               class="form-control" 
+                                               id="serviceEndDate" 
+                                               th:field="*{serviceEndDate}">
+                                        <div class="form-text">비어있으면 무제한</div>
                                     </div>
                                 </div>
                             </div>
@@ -418,29 +443,14 @@
             this.value = this.value.replace(/[^0-9]/g, '').substring(0, 6);
         });
 
-        // 해상도 선택 변경
-        document.getElementById('resolution').addEventListener('change', function() {
-            const customDiv = document.getElementById('customResolution');
-            if (this.value === 'custom') {
-                customDiv.classList.remove('d-none');
-            } else {
-                customDiv.classList.add('d-none');
-            }
+        // 해상도 입력 검증 (숫자만 허용)
+        document.getElementById('resolutionWidth').addEventListener('input', function(e) {
+            if (this.value < 1) this.value = 1;
         });
-
-        // 사용자 정의 해상도 입력
-        document.getElementById('customWidth').addEventListener('input', updateCustomResolution);
-        document.getElementById('customHeight').addEventListener('input', updateCustomResolution);
-
-        function updateCustomResolution() {
-            const width = document.getElementById('customWidth').value;
-            const height = document.getElementById('customHeight').value;
-            const resolutionSelect = document.getElementById('resolution');
-            
-            if (width && height) {
-                resolutionSelect.value = width + 'x' + height;
-            }
-        }
+        
+        document.getElementById('resolutionHeight').addEventListener('input', function(e) {
+            if (this.value < 1) this.value = 1;
+        });
 
         // 날씨 검색 모달 열기
         function openWeatherSearch() {
@@ -469,6 +479,7 @@
         // 날씨 데이터 설정
         window.setWeatherData = function(region, nx, ny) {
             document.getElementById('region').value = region;
+            document.getElementById('weatherLocation').value = region; // 주소 표시
             document.getElementById('weatherNx').value = nx;
             document.getElementById('weatherNy').value = ny;
             
@@ -484,6 +495,15 @@
             document.getElementById('airStationName').value = stationName;
         };
 
+        // 초기화 시 기존 데이터 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            // 수정 모드일 때 기존 주소 표시
+            const region = document.getElementById('region').value;
+            if (region) {
+                document.getElementById('weatherLocation').value = region;
+            }
+        });
+        
         // 지역명에서 시도코드 추출
         function getRegionCodeFromName(regionName) {
             if (!regionName) return null;

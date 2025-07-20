@@ -248,32 +248,55 @@
                                 <td th:text="${player.playerName}"></td>
                                 <td th:text="${player.region}"></td>
                                 <td>
-                                    <small class="text-info" th:text="${player.resolution}"></small>
+                                    <small class="text-info">
+                                        <span th:if="${player.resolutionWidth != null and player.resolutionHeight != null}" 
+                                              th:text="${player.resolutionWidth + 'x' + player.resolutionHeight}"></span>
+                                        <span th:unless="${player.resolutionWidth != null and player.resolutionHeight != null}" 
+                                              class="text-muted">-</span>
+                                    </small>
                                 </td>
                                 <td>
                                     <span class="badge bg-secondary" th:text="${player.theme}"></span>
                                 </td>
                                 <td>
-                                    <span th:if="${player.connectionStatus == 'CONNECTED'}" 
-                                          class="badge bg-success">
-                                        <i class="fas fa-circle"></i> 접속중
+                                    <!-- 실제 접속 상태 (서비스 기간 및 권한 고려) -->
+                                    <span th:if="${!player.accessAllowed or !player.isServiceActive()}" 
+                                          class="badge bg-danger">
+                                        <i class="fas fa-ban"></i> 접속차단
                                     </span>
-                                    <span th:if="${player.connectionStatus == 'WAITING'}" 
-                                          class="badge bg-warning">
-                                        <i class="fas fa-clock"></i> 접속대기
-                                    </span>
-                                    <span th:if="${player.connectionStatus == 'DISCONNECTED'}" 
-                                          class="badge bg-secondary">
-                                        <i class="fas fa-circle"></i> 미접속
+                                    <span th:unless="${!player.accessAllowed or !player.isServiceActive()}">
+                                        <span th:if="${player.connectionStatus == 'CONNECTED'}" 
+                                              class="badge bg-success">
+                                            <i class="fas fa-circle"></i> 접속중
+                                        </span>
+                                        <span th:if="${player.connectionStatus == 'WAITING'}" 
+                                              class="badge bg-warning">
+                                            <i class="fas fa-clock"></i> 접속대기
+                                        </span>
+                                        <span th:if="${player.connectionStatus == 'DISCONNECTED'}" 
+                                              class="badge bg-secondary">
+                                            <i class="fas fa-circle"></i> 미접속
+                                        </span>
                                     </span>
                                 </td>
                                 <td>
-                                    <span th:if="${player.accessAllowed}" class="badge bg-success">
-                                        <i class="fas fa-check"></i> 허가
-                                    </span>
-                                    <span th:unless="${player.accessAllowed}" class="badge bg-danger">
-                                        <i class="fas fa-ban"></i> 차단
-                                    </span>
+                                    <!-- 접속 권한 + 서비스 기간 표시 -->
+                                    <div>
+                                        <span th:if="${player.accessAllowed}" class="badge bg-success">
+                                            <i class="fas fa-check"></i> 허가
+                                        </span>
+                                        <span th:unless="${player.accessAllowed}" class="badge bg-danger">
+                                            <i class="fas fa-ban"></i> 차단
+                                        </span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span th:if="${player.isServiceActive()}" class="badge bg-success">
+                                            <i class="fas fa-calendar-check"></i> 서비스중
+                                        </span>
+                                        <span th:unless="${player.isServiceActive()}" class="badge bg-warning">
+                                            <i class="fas fa-calendar-times"></i> 기간외
+                                        </span>
+                                    </div>
                                 </td>
                                 <td>
                                     <small th:if="${player.lastConnectedAt}" 

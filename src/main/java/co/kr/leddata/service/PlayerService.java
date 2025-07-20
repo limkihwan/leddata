@@ -70,6 +70,17 @@ public class PlayerService {
             throw new RuntimeException("접속이 차단된 플레이어입니다: " + playerCode);
         }
         
+        // 서비스 기간 확인
+        if (!player.isServiceActive()) {
+            LocalDateTime now = LocalDateTime.now();
+            if (player.getServiceStartDate() != null && now.isBefore(player.getServiceStartDate())) {
+                throw new RuntimeException("서비스 시작 전입니다. 시작일: " + player.getServiceStartDate());
+            }
+            if (player.getServiceEndDate() != null && now.isAfter(player.getServiceEndDate())) {
+                throw new RuntimeException("서비스가 종료되었습니다. 종료일: " + player.getServiceEndDate());
+            }
+        }
+        
         String sessionId = UUID.randomUUID().toString();
         PlayerSession session = new PlayerSession(sessionId, playerCode, ipAddress);
         session.setUserAgent(userAgent);

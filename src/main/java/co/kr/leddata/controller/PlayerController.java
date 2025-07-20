@@ -45,7 +45,7 @@ public class PlayerController {
             String ipAddress = getClientIpAddress(request);
             String userAgent = request.getHeader("User-Agent");
             
-            // 플레이어 접속 시도
+            // 플레이어 접속 시도 (서비스 기간 및 권한 체크 포함)
             String playerSessionId = playerService.attemptConnection(playerCode, ipAddress, userAgent);
             
             // 세션에 정보 저장

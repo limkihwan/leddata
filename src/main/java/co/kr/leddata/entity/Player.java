@@ -37,9 +37,19 @@ public class Player {
     @Column(name = "theme", length = 50)
     private String theme;
     
-    // 해상도
-    @Column(name = "resolution", length = 20)
-    private String resolution;
+    // 해상도 (가로x세로 분리)
+    @Column(name = "resolution_width")
+    private Integer resolutionWidth;
+    
+    @Column(name = "resolution_height")
+    private Integer resolutionHeight;
+    
+    // 서비스 기간
+    @Column(name = "service_start_date")
+    private LocalDateTime serviceStartDate;
+    
+    @Column(name = "service_end_date")
+    private LocalDateTime serviceEndDate;
     
     // 접속 상태
     @Column(name = "connection_status")
@@ -111,8 +121,60 @@ public class Player {
     public String getTheme() { return theme; }
     public void setTheme(String theme) { this.theme = theme; }
     
-    public String getResolution() { return resolution; }
-    public void setResolution(String resolution) { this.resolution = resolution; }
+    public Integer getResolutionWidth() { return resolutionWidth; }
+    public void setResolutionWidth(Integer resolutionWidth) { this.resolutionWidth = resolutionWidth; }
+    
+    public Integer getResolutionHeight() { return resolutionHeight; }
+    public void setResolutionHeight(Integer resolutionHeight) { this.resolutionHeight = resolutionHeight; }
+    
+    public LocalDateTime getServiceStartDate() { return serviceStartDate; }
+    public void setServiceStartDate(LocalDateTime serviceStartDate) { this.serviceStartDate = serviceStartDate; }
+    
+    public LocalDateTime getServiceEndDate() { return serviceEndDate; }
+    public void setServiceEndDate(LocalDateTime serviceEndDate) { this.serviceEndDate = serviceEndDate; }
+    
+    // 서비스 기간 체크 메서드
+    public boolean isServiceActive() {
+        LocalDateTime now = LocalDateTime.now();
+        if (serviceStartDate != null && now.isBefore(serviceStartDate)) {
+            return false; // 서비스 시작 전
+        }
+        if (serviceEndDate != null && now.isAfter(serviceEndDate)) {
+            return false; // 서비스 종료 후
+        }
+        return true;
+    }
+    
+    // 접속 상태 판단 메서드
+    public String getActualConnectionStatus() {
+        if (!accessAllowed || !isServiceActive()) {
+            return "BLOCKED"; // 접속차단
+        }
+        return connectionStatus != null ? connectionStatus : "DISCONNECTED";
+    }
+    
+    // 해상도 문자열 반환 (호환성을 위해)
+    public String getResolution() {
+        if (resolutionWidth != null && resolutionHeight != null) {
+            return resolutionWidth + "x" + resolutionHeight;
+        }
+        return "";
+    }
+    
+    // 해상도 문자열 설정 (호환성을 위해)
+    public void setResolution(String resolution) {
+        if (resolution != null && resolution.contains("x")) {
+            String[] parts = resolution.split("x");
+            if (parts.length == 2) {
+                try {
+                    this.resolutionWidth = Integer.parseInt(parts[0]);
+                    this.resolutionHeight = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e) {
+                    // 파싱 실패 시 무시
+                }
+            }
+        }
+    }
     
     public String getConnectionStatus() { return connectionStatus; }
     public void setConnectionStatus(String connectionStatus) { this.connectionStatus = connectionStatus; }

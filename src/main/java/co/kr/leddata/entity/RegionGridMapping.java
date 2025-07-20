@@ -1,6 +1,7 @@
 package co.kr.leddata.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "region_grid_mapping")
@@ -19,8 +20,20 @@ public class RegionGridMapping {
     private Integer nx;   // 기상청 격자 X
     private Integer ny;   // 기상청 격자 Y
     
-    private Double lonTotal; // 경도
-    private Double latTotal; // 위도
+    // 경위도 필드 추가
+    private Double longitude; // 경도
+    private Double latitude;  // 위도
+    
+    // 기존 필드들 (호환성 유지)
+    private Double lonTotal; // 경도 (legacy)
+    private Double latTotal; // 위도 (legacy)
+    
+    // 타임스탬프 필드 추가
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     
     // 생성자
     public RegionGridMapping() {}
@@ -32,6 +45,20 @@ public class RegionGridMapping {
         this.name3 = name3;
         this.nx = nx;
         this.ny = ny;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    // JPA 라이프사이클 메서드
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
     
     // Getter & Setter
@@ -56,11 +83,38 @@ public class RegionGridMapping {
     public Integer getNy() { return ny; }
     public void setNy(Integer ny) { this.ny = ny; }
     
+    // 새로운 경위도 필드
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { 
+        this.longitude = longitude;
+        this.lonTotal = longitude; // 호환성 유지
+    }
+    
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { 
+        this.latitude = latitude;
+        this.latTotal = latitude; // 호환성 유지
+    }
+    
+    // 기존 필드들 (호환성 유지)
     public Double getLonTotal() { return lonTotal; }
-    public void setLonTotal(Double lonTotal) { this.lonTotal = lonTotal; }
+    public void setLonTotal(Double lonTotal) { 
+        this.lonTotal = lonTotal;
+        if (this.longitude == null) this.longitude = lonTotal;
+    }
     
     public Double getLatTotal() { return latTotal; }
-    public void setLatTotal(Double latTotal) { this.latTotal = latTotal; }
+    public void setLatTotal(Double latTotal) { 
+        this.latTotal = latTotal;
+        if (this.latitude == null) this.latitude = latTotal;
+    }
+    
+    // 타임스탬프 필드
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     
     // 전체 주소 조합
     public String getFullAddress() {
@@ -71,9 +125,39 @@ public class RegionGridMapping {
         return sb.toString().trim();
     }
     
+    // 지역명 반환 (검색용)
+    public String getRegionName() {
+        return getFullAddress();
+    }
+    
+    // 좌표 유효성 검사
+    public boolean hasValidCoordinates() {
+        return nx != null && ny != null && nx > 0 && ny > 0;
+    }
+    
+    // 경위도 유효성 검사
+    public boolean hasValidLatLon() {
+        return longitude != null && latitude != null && 
+               longitude >= 124.0 && longitude <= 132.0 && 
+               latitude >= 33.0 && latitude <= 38.0;
+    }
+    
     @Override
     public String toString() {
-        return String.format("RegionGridMapping{code='%s', address='%s', nx=%d, ny=%d}", 
-                           code, getFullAddress(), nx, ny);
+        return String.format("RegionGridMapping{code='%s', address='%s', nx=%d, ny=%d, lon=%.4f, lat=%.4f}", 
+                           code, getFullAddress(), nx, ny, longitude, latitude);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        RegionGridMapping that = (RegionGridMapping) obj;
+        return code != null ? code.equals(that.code) : that.code == null;
+    }
+    
+    @Override
+    public int hashCode() {
+        return code != null ? code.hashCode() : 0;
     }
 }
