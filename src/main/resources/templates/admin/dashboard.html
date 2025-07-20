@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - LED 환경정보 서비스</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #343a40 0%, #495057 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+            border-left: 4px solid #007bff;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바 -->
+    <nav class="sidebar">
+        <div class="p-4">
+            <h4 class="text-white text-center">
+                <i class="fas fa-leaf text-success"></i>
+                LED 시스템
+            </h4>
+            <hr class="text-white-50">
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    대시보드
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/players">
+                    <i class="fas fa-users me-2"></i>
+                    플레이어 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/location/weather">
+                    <i class="fas fa-cloud-sun me-2"></i>
+                    날씨 검색
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/location/air">
+                    <i class="fas fa-smog me-2"></i>
+                    대기질 검색
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/h2-console" target="_blank">
+                    <i class="fas fa-database me-2"></i>
+                    데이터베이스
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/player/240025" target="_blank">
+                    <i class="fas fa-tv me-2"></i>
+                    플레이어 미리보기
+                </a>
+            </li>
+        </ul>
+        
+        <!-- 하단 로그아웃 -->
+        <div class="position-absolute bottom-0 w-100 p-3">
+            <div class="text-center text-white-50 mb-2">
+                <small>
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${adminUsername}">admin</span>
+                </small>
+            </div>
+            <form action="/admin/logout" method="post" class="d-grid">
+                <button type="submit" class="btn btn-outline-light btn-sm" 
+                        onclick="return confirm('로그아웃하시겠습니까?')">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-tachometer-alt text-primary"></i>
+                관리자 대시보드
+            </h2>
+            <div class="text-muted">
+                <i class="fas fa-clock"></i>
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <h4 id="playerCount">로딩중...</h4>
+                        <p class="mb-0">등록된 플레이어</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marker-alt fa-2x mb-3"></i>
+                        <h4 id="regionCount">로딩중...</h4>
+                        <p class="mb-0">지역 데이터</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-wind fa-2x mb-3"></i>
+                        <h4 id="airStationCount">로딩중...</h4>
+                        <p class="mb-0">대기질 측정소</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-network-wired fa-2x mb-3"></i>
+                        <h4 id="connectedCount">0</h4>
+                        <p class="mb-0">접속 중인 플레이어</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 시스템 상태 -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line text-primary"></i>
+                            실시간 시스템 모니터링
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="p-3 bg-success bg-opacity-10 rounded">
+                                    <i class="fas fa-server fa-2x text-success mb-2"></i>
+                                    <h6>애플리케이션</h6>
+                                    <span class="badge bg-success">정상 운영</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="p-3 bg-info bg-opacity-10 rounded">
+                                    <i class="fas fa-database fa-2x text-info mb-2"></i>
+                                    <h6>데이터베이스</h6>
+                                    <span class="badge bg-info">H2 연결됨</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="p-3 bg-warning bg-opacity-10 rounded">
+                                    <i class="fas fa-sync-alt fa-2x text-warning mb-2"></i>
+                                    <h6>데이터 수집</h6>
+                                    <span class="badge bg-warning">스케줄 활성</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tools text-primary"></i>
+                            빠른 작업
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="initData()">
+                                <i class="fas fa-sync me-2"></i>
+                                데이터 초기화
+                            </button>
+                            <a href="/admin/players/new" class="btn btn-outline-success">
+                                <i class="fas fa-plus me-2"></i>
+                                플레이어 등록
+                            </a>
+                            <button class="btn btn-outline-info" onclick="collectData()">
+                                <i class="fas fa-download me-2"></i>
+                                수동 데이터 수집
+                            </button>
+                            <a href="/h2-console" target="_blank" class="btn btn-outline-secondary">
+                                <i class="fas fa-database me-2"></i>
+                                H2 콘솔
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최근 활동 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history text-primary"></i>
+                            시스템 로그
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="systemLogs">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success me-2">INFO</span>
+                                <small class="text-muted me-2" id="logTime1"></small>
+                                <span>시스템이 정상적으로 시작되었습니다.</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-info me-2">INFO</span>
+                                <small class="text-muted me-2" id="logTime2"></small>
+                                <span>데이터베이스 연결이 성공했습니다.</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-warning me-2">INFO</span>
+                                <small class="text-muted me-2" id="logTime3"></small>
+                                <span>스케줄러가 활성화되었습니다.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 현재 시간 업데이트
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+        }
+        
+        // 데이터 로드
+        async function loadDashboardData() {
+            try {
+                // 데이터 개수 로드
+                const response = await fetch('/admin/data/count');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('regionCount').textContent = data.regionCount;
+                    document.getElementById('airStationCount').textContent = data.airStationCount;
+                }
+                
+                // 플레이어 개수 (임시)
+                document.getElementById('playerCount').textContent = '10';
+                document.getElementById('connectedCount').textContent = '3';
+                
+            } catch (error) {
+                console.error('데이터 로드 실패:', error);
+                document.getElementById('regionCount').textContent = 'N/A';
+                document.getElementById('airStationCount').textContent = 'N/A';
+                document.getElementById('playerCount').textContent = 'N/A';
+            }
+        }
+        
+        // 데이터 초기화
+        async function initData() {
+            if (!confirm('데이터를 초기화하시겠습니까?')) return;
+            
+            try {
+                const response = await fetch('/admin/data/init');
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`데이터 초기화 완료!\n지역: ${data.regionCount}개\n측정소: ${data.airStationCount}개`);
+                    loadDashboardData();
+                } else {
+                    alert('초기화 실패: ' + data.error);
+                }
+            } catch (error) {
+                alert('초기화 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 수동 데이터 수집
+        async function collectData() {
+            try {
+                const response = await fetch('/api/collect', { method: 'POST' });
+                const data = await response.json();
+                alert('데이터 수집이 시작되었습니다.');
+            } catch (error) {
+                alert('데이터 수집 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 로그 시간 설정
+        function setLogTimes() {
+            const now = new Date();
+            document.getElementById('logTime1').textContent = 
+                new Date(now.getTime() - 60000).toLocaleTimeString('ko-KR');
+            document.getElementById('logTime2').textContent = 
+                new Date(now.getTime() - 30000).toLocaleTimeString('ko-KR');
+            document.getElementById('logTime3').textContent = 
+                now.toLocaleTimeString('ko-KR');
+        }
+        
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadDashboardData();
+            setLogTimes();
+            
+            // 5분마다 데이터 새로고침
+            setInterval(loadDashboardData, 300000);
+        });
+    </script>
+</body>
+</html>

@@ -10,9 +10,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin")
 public class AdminLoginController {
     
-    // 기본 관리자 계정 (실제 운영에서는 데이터베이스나 설정 파일에서 관리)
-    private static final String ADMIN_USERNAME = "admin";
-    private static final String ADMIN_PASSWORD = "leddata2024";
+    // 관리자 계정
+    private static final String ADMIN_USERNAME = "neox";
+    private static final String ADMIN_PASSWORD = "neox0423";
     
     // 로그인 페이지
     @GetMapping("/login")

@@ -6,177 +6,320 @@
     <title>플레이어 관리 - LED 환경정보 서비스</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #343a40 0%, #495057 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+            border-left: 4px solid #007bff;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: #f8f9fa;
+        }
+        .btn-action {
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-users"></i> 플레이어 관리</h2>
-                    <div>
-                        <a href="/admin/search" class="btn btn-info me-2">
-                            <i class="fas fa-search"></i> 지역검색
-                        </a>
-                        <a href="/admin/players/new" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> 플레이어 등록
-                        </a>
-                    </div>
-                </div>
+    <!-- 사이드바 -->
+    <nav class="sidebar">
+        <div class="p-4">
+            <h4 class="text-white text-center">
+                <i class="fas fa-leaf text-success"></i>
+                LED 시스템
+            </h4>
+            <hr class="text-white-50">
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    대시보드
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/players">
+                    <i class="fas fa-users me-2"></i>
+                    플레이어 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/location/weather">
+                    <i class="fas fa-cloud-sun me-2"></i>
+                    날씨 검색
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/location/air">
+                    <i class="fas fa-smog me-2"></i>
+                    대기질 검색
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/h2-console" target="_blank">
+                    <i class="fas fa-database me-2"></i>
+                    데이터베이스
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/player/240025" target="_blank">
+                    <i class="fas fa-tv me-2"></i>
+                    플레이어 미리보기
+                </a>
+            </li>
+        </ul>
+        
+        <!-- 하단 로그아웃 -->
+        <div class="position-absolute bottom-0 w-100 p-3">
+            <div class="text-center text-white-50 mb-2">
+                <small>
+                    <i class="fas fa-user-circle"></i>
+                    admin
+                </small>
+            </div>
+            <form action="/admin/logout" method="post" class="d-grid">
+                <button type="submit" class="btn btn-outline-light btn-sm" 
+                        onclick="return confirm('로그아웃하시겠습니까?')">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </nav>
 
-                <!-- 알림 메시지 -->
-                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <!-- 헤더 -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-users text-primary"></i>
+                플레이어 관리
+            </h2>
+            <div>
+                <a href="/admin/location/weather" class="btn btn-info me-2">
+                    <i class="fas fa-search"></i> 지역검색
+                </a>
+                <a href="/admin/players/new" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 플레이어 등록
+                </a>
+            </div>
+        </div>
 
-                <!-- 플레이어 목록 테이블 -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">등록된 플레이어 목록</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>플레이어 코드</th>
-                                        <th>플레이어 명</th>
-                                        <th>지역</th>
-                                        <th>해상도</th>
-                                        <th>테마</th>
-                                        <th>접속 상태</th>
-                                        <th>접속 권한</th>
-                                        <th>마지막 접속</th>
-                                        <th>관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:if="${#lists.isEmpty(players)}">
-                                        <td colspan="9" class="text-center text-muted">
-                                            등록된 플레이어가 없습니다.
-                                        </td>
-                                    </tr>
-                                    <tr th:each="player : ${players}">
-                                        <td>
-                                            <strong th:text="${player.playerCode}"></strong>
-                                        </td>
-                                        <td th:text="${player.playerName}"></td>
-                                        <td th:text="${player.region}"></td>
-                                        <td>
-                                            <small class="text-info" th:text="${player.resolution}"></small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary" th:text="${player.theme}"></span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${player.connectionStatus == 'CONNECTED'}" 
-                                                  class="badge bg-success">
-                                                <i class="fas fa-circle"></i> 접속중
-                                            </span>
-                                            <span th:if="${player.connectionStatus == 'WAITING'}" 
-                                                  class="badge bg-warning">
-                                                <i class="fas fa-clock"></i> 접속대기
-                                            </span>
-                                            <span th:if="${player.connectionStatus == 'DISCONNECTED'}" 
-                                                  class="badge bg-secondary">
-                                                <i class="fas fa-circle"></i> 미접속
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${player.accessAllowed}" class="badge bg-success">
-                                                <i class="fas fa-check"></i> 허가
-                                            </span>
-                                            <span th:unless="${player.accessAllowed}" class="badge bg-danger">
-                                                <i class="fas fa-ban"></i> 차단
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small th:if="${player.lastConnectedAt}" 
-                                                   th:text="${#temporals.format(player.lastConnectedAt, 'MM-dd HH:mm')}">
-                                            </small>
-                                            <small th:unless="${player.lastConnectedAt}" class="text-muted">
-                                                접속한 적 없음
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <!-- 수정 버튼 -->
-                                                <a th:href="@{/admin/players/{code}/edit(code=${player.playerCode})}" 
-                                                   class="btn btn-sm btn-outline-primary" title="수정">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                
-                                                <!-- 세션 관리 -->
-                                                <a th:href="@{/admin/players/{code}/sessions(code=${player.playerCode})}" 
-                                                   class="btn btn-sm btn-outline-info" title="세션 관리">
-                                                    <i class="fas fa-network-wired"></i>
-                                                </a>
-                                                
-                                                <!-- 접속 권한 토글 -->
-                                                <form th:action="@{/admin/players/{code}/toggle-access(code=${player.playerCode})}" 
-                                                      method="post" style="display: inline;">
-                                                    <button type="submit" 
-                                                            th:class="${player.accessAllowed} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
-                                                            th:title="${player.accessAllowed} ? '접속 차단' : '접속 허가'">
-                                                        <i th:class="${player.accessAllowed} ? 'fas fa-ban' : 'fas fa-check'"></i>
-                                                    </button>
-                                                </form>
-                                                
-                                                <!-- 삭제 버튼 -->
-                                                <form th:action="@{/admin/players/{code}/delete(code=${player.playerCode})}" 
-                                                      method="post" style="display: inline;"
-                                                      onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="삭제">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- 알림 메시지 -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <h4 th:text="${#lists.size(players)}">0</h4>
+                        <p class="mb-0">총 플레이어</p>
                     </div>
                 </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-circle fa-2x mb-3"></i>
+                        <h4 id="connectedCount">0</h4>
+                        <p class="mb-0">접속중</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-3"></i>
+                        <h4 id="waitingCount">0</h4>
+                        <p class="mb-0">접속대기</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card stat-card info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-ban fa-2x mb-3"></i>
+                        <h4 id="blockedCount">0</h4>
+                        <p class="mb-0">접속차단</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                <!-- 통계 정보 -->
-                <div class="row mt-4">
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">총 플레이어</h5>
-                                <h3 th:text="${#lists.size(players)}">0</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title text-success">접속중</h5>
-                                <h3 id="connectedCount">0</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title text-warning">접속대기</h5>
-                                <h3 id="waitingCount">0</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title text-danger">접속차단</h5>
-                                <h3 id="blockedCount">0</h3>
-                            </div>
-                        </div>
-                    </div>
+        <!-- 플레이어 목록 테이블 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list text-primary"></i>
+                    등록된 플레이어 목록
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>플레이어 코드</th>
+                                <th>플레이어 명</th>
+                                <th>지역</th>
+                                <th>해상도</th>
+                                <th>테마</th>
+                                <th>접속 상태</th>
+                                <th>접속 권한</th>
+                                <th>마지막 접속</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(players)}">
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3 text-muted"></i><br>
+                                    등록된 플레이어가 없습니다.
+                                </td>
+                            </tr>
+                            <tr th:each="player : ${players}">
+                                <td>
+                                    <strong class="text-primary" th:text="${player.playerCode}"></strong>
+                                </td>
+                                <td th:text="${player.playerName}"></td>
+                                <td th:text="${player.region}"></td>
+                                <td>
+                                    <small class="text-info" th:text="${player.resolution}"></small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${player.theme}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${player.connectionStatus == 'CONNECTED'}" 
+                                          class="badge bg-success">
+                                        <i class="fas fa-circle"></i> 접속중
+                                    </span>
+                                    <span th:if="${player.connectionStatus == 'WAITING'}" 
+                                          class="badge bg-warning">
+                                        <i class="fas fa-clock"></i> 접속대기
+                                    </span>
+                                    <span th:if="${player.connectionStatus == 'DISCONNECTED'}" 
+                                          class="badge bg-secondary">
+                                        <i class="fas fa-circle"></i> 미접속
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:if="${player.accessAllowed}" class="badge bg-success">
+                                        <i class="fas fa-check"></i> 허가
+                                    </span>
+                                    <span th:unless="${player.accessAllowed}" class="badge bg-danger">
+                                        <i class="fas fa-ban"></i> 차단
+                                    </span>
+                                </td>
+                                <td>
+                                    <small th:if="${player.lastConnectedAt}" 
+                                           th:text="${#temporals.format(player.lastConnectedAt, 'MM-dd HH:mm')}">
+                                    </small>
+                                    <small th:unless="${player.lastConnectedAt}" class="text-muted">
+                                        접속한 적 없음
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <!-- 수정 버튼 -->
+                                        <a th:href="@{/admin/players/{code}/edit(code=${player.playerCode})}" 
+                                           class="btn btn-sm btn-outline-primary btn-action" title="수정">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <!-- 세션 관리 -->
+                                        <a th:href="@{/admin/players/{code}/sessions(code=${player.playerCode})}" 
+                                           class="btn btn-sm btn-outline-info btn-action" title="세션 관리">
+                                            <i class="fas fa-network-wired"></i>
+                                        </a>
+                                        
+                                        <!-- 접속 권한 토글 -->
+                                        <form th:action="@{/admin/players/{code}/toggle-access(code=${player.playerCode})}" 
+                                              method="post" style="display: inline;">
+                                            <button type="submit" 
+                                                    th:class="${player.accessAllowed} ? 'btn btn-sm btn-outline-warning btn-action' : 'btn btn-sm btn-outline-success btn-action'"
+                                                    th:title="${player.accessAllowed} ? '접속 차단' : '접속 허가'">
+                                                <i th:class="${player.accessAllowed} ? 'fas fa-ban' : 'fas fa-check'"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- 삭제 버튼 -->
+                                        <form th:action="@{/admin/players/{code}/delete(code=${player.playerCode})}" 
+                                              method="post" style="display: inline;"
+                                              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger btn-action" title="삭제">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -184,7 +327,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 통계 계산 (JavaScript로 처리)
+        // 통계 계산
         document.addEventListener('DOMContentLoaded', function() {
             let connectedCount = 0;
             let waitingCount = 0;
