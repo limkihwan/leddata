@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 지역코드 검색 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .search-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .search-btn {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .search-types {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-type-btn {
+            padding: 8px 16px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .search-type-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .result-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .result-title {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-count {
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .result-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .result-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .region-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .region-info {
+            flex: 1;
+        }
+        
+        .region-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .region-coords {
+            font-size: 12px;
+            color: #6c757d;
+            font-family: monospace;
+        }
+        
+        .station-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .station-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .station-sigu {
+            font-size: 12px;
+            color: #007bff;
+            margin-bottom: 2px;
+        }
+        
+        .station-addr {
+            font-size: 11px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
+        .copy-btn {
+            padding: 4px 8px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .config-generator {
+            background: #e7f3ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .config-title {
+            color: #0066cc;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .config-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .nav-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #007bff;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            border: 2px solid #007bff;
+        }
+        
+        .nav-btn:hover {
+            background: #007bff;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-types {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 지역코드 검색 시스템</h1>
+            <p>기상청 격자 좌표 & 대기질 측정소 통합 검색</p>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" 
+                       placeholder="지역명을 입력하세요 (예: 서울, 부산, 강남구, 종로구)">
+                <button onclick="performSearch()" class="search-btn">🔍 검색</button>
+            </div>
+            
+            <div class="search-types">
+                <button class="search-type-btn active" data-type="all">🌐 통합검색</button>
+                <button class="search-type-btn" data-type="regions">📍 지역코드</button>
+                <button class="search-type-btn" data-type="stations">🌫️ 측정소</button>
+                <button class="search-type-btn" data-type="suggest">⚙️ 설정추천</button>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <div class="result-box">
+                <div class="result-title">
+                    📍 기상청 격자 좌표
+                    <span class="result-count" id="regionCount">0</span>
+                </div>
+                <div class="result-list" id="regionResults">
+                    <div class="no-results">지역명을 검색하여 격자 좌표를 찾아보세요</div>
+                </div>
+            </div>
+            
+            <div class="result-box">
+                <div class="result-title">
+                    🌫️ 대기질 측정소
+                    <span class="result-count" id="stationCount">0</span>
+                </div>
+                <div class="result-list" id="stationResults">
+                    <div class="no-results">지역명을 검색하여 측정소를 찾아보세요</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-generator">
+            <h3 class="config-title">⚙️ 플레이어 설정 코드 생성기</h3>
+            <div class="config-preview" id="configPreview">
+검색 결과를 클릭하면 플레이어 설정 코드가 자동으로 생성됩니다.
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/admin/config" class="nav-btn">⚙️ 설정관리</a>
+            <a href="/player/240025" class="nav-btn">🏠 메인으로</a>
+            <a href="/api/status" class="nav-btn" target="_blank">📊 API 상태</a>
+        </div>
+    </div>
+    
+    <script>
+        let currentSearchType = 'all';
+        let selectedRegion = null;
+        let selectedStation = null;
+        
+        // 검색 타입 버튼 이벤트
+        document.querySelectorAll('.search-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.search-type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentSearchType = this.dataset.type;
+            });
+        });
+        
+        // 엔터키 검색
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // 검색 실행
+        async function performSearch() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                alert('검색어를 입력해주세요.');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                let url = `/admin/search/api/${currentSearchType}?keyword=${encodeURIComponent(keyword)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (currentSearchType === 'all') {
+                    displayAllResults(data);
+                } else if (currentSearchType === 'regions') {
+                    displayRegionResults(data);
+                    clearStationResults();
+                } else if (currentSearchType === 'stations') {
+                    displayStationResults(data);
+                    clearRegionResults();
+                } else if (currentSearchType === 'suggest') {
+                    displaySuggestionResults(data);
+                }
+                
+            } catch (error) {
+                console.error('검색 오류:', error);
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 통합 검색 결과 표시
+        function displayAllResults(data) {
+            displayRegionResults(data.regions);
+            displayStationResults(data.airStations);
+        }
+        
+        // 지역 검색 결과 표시
+        function displayRegionResults(regions) {
+            const container = document.getElementById('regionResults');
+            const countElement = document.getElementById('regionCount');
+            
+            countElement.textContent = regions.length;
+            
+            if (regions.length === 0) {
+                container.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+                return;
+            }
+            
+            container.innerHTML = regions.map(region => `
+                <div class="result-item region-item" onclick="selectRegion(${JSON.stringify(region).replace(/"/g, '&quot;')})">
+                    <div class="region-info">
+                        <div class="region-name">${region.fullAddress || (region.name1 + ' ' + region.name2 + ' ' + region.name3).trim()}</div>
+                        <div class="region-coords">nx: ${region.nx}, ny: ${region.ny} | 코드: ${region.code}</div>
+                    </div>
+                    <button class="copy-btn" onclick="event.stopPropagation(); copyCoords(${region.nx}, ${region.ny})">복사</button>
+                </div>
+            `).join('');
+        }
+        
+        // 측정소 검색 결과 표시
+        function displayStationResults(stations) {
+            const container = document.getElementById('stationResults');
+            const countElement = document.getElementById('stationCount');
+            
+            countElement.textContent = stations.length;
+            
+            if (stations.length === 0) {
+                container.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+                return;
+            }
+            
+            container.innerHTML = stations.map(station => `
+                <div class="result-item station-item" onclick="selectStation(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+                    <div class="station-name">${station.stationName}</div>
+                    <div class="station-sigu">${station.stationSigu}</div>
+                    <div class="station-addr">${station.addr || ''}</div>
+                </div>
+            `).join('');
+        }
+        
+        // 추천 결과 표시
+        function displaySuggestionResults(data) {
+            displayRegionResults(data.allRegions || []);
+            displayStationResults(data.allStations || []);
+            
+            if (data.region && data.stationName) {
+                generatePlayerConfig(data);
+            }
+        }
+        
+        // 지역 선택
+        function selectRegion(region) {
+            selectedRegion = region;
+            updateConfigPreview();
+            
+            // 선택된 아이템 하이라이트
+            document.querySelectorAll('.region-item').forEach(item => item.style.background = '');
+            event.currentTarget.style.background = '#e3f2fd';
+        }
+        
+        // 측정소 선택
+        function selectStation(station) {
+            selectedStation = station;
+            updateConfigPreview();
+            
+            // 선택된 아이템 하이라이트
+            document.querySelectorAll('.station-item').forEach(item => item.style.background = '');
+            event.currentTarget.style.background = '#e3f2fd';
+        }
+        
+        // 설정 코드 미리보기 업데이트
+        function updateConfigPreview() {
+            if (selectedRegion && selectedStation) {
+                generatePlayerConfig({
+                    region: selectedRegion.fullAddress || (selectedRegion.name1 + ' ' + selectedRegion.name2).trim(),
+                    nx: selectedRegion.nx,
+                    ny: selectedRegion.ny,
+                    code: selectedRegion.code,
+                    stationName: selectedStation.stationName,
+                    stationSigu: selectedStation.stationSigu
+                });
+            } else if (selectedRegion) {
+                const preview = document.getElementById('configPreview');
+                preview.textContent = `선택된 지역: ${selectedRegion.fullAddress || (selectedRegion.name1 + ' ' + selectedRegion.name2).trim()}
+격자 좌표: nx=${selectedRegion.nx}, ny=${selectedRegion.ny}
+
+측정소를 선택하면 완전한 설정 코드가 생성됩니다.`;
+            } else if (selectedStation) {
+                const preview = document.getElementById('configPreview');
+                preview.textContent = `선택된 측정소: ${selectedStation.stationName}
+지역: ${selectedStation.stationSigu}
+
+지역을 선택하면 완전한 설정 코드가 생성됩니다.`;
+            }
+        }
+        
+        // 플레이어 설정 코드 생성
+        function generatePlayerConfig(data) {
+            const playerCode = '240' + String(Math.floor(Math.random() * 900) + 100);
+            const config = {
+                [playerCode]: {
+                    name: data.region + ' 플레이어',
+                    location: {
+                        nx: data.nx,
+                        ny: data.ny,
+                        region: data.region,
+                        stationName: data.stationName
+                    },
+                    api: ['weather', 'air'],
+                    theme: 'default',
+                    service: {
+                        start: '2024-01-01',
+                        end: '2025-12-31',
+                        state: 0
+                    }
+                }
+            };
+            
+            const configText = JSON.stringify(config, null, 2);
+            document.getElementById('configPreview').textContent = configText;
+        }
+        
+        // 좌표 복사
+        function copyCoords(nx, ny) {
+            const text = `nx: ${nx}, ny: ${ny}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('좌표가 복사되었습니다: ' + text);
+            });
+        }
+        
+        // 로딩 표시
+        function showLoading() {
+            document.getElementById('regionResults').innerHTML = '<div class="loading">🔍 검색 중...</div>';
+            document.getElementById('stationResults').innerHTML = '<div class="loading">🔍 검색 중...</div>';
+        }
+        
+        // 결과 초기화
+        function clearRegionResults() {
+            document.getElementById('regionResults').innerHTML = '<div class="no-results">지역 검색 결과가 없습니다</div>';
+            document.getElementById('regionCount').textContent = '0';
+        }
+        
+        function clearStationResults() {
+            document.getElementById('stationResults').innerHTML = '<div class="no-results">측정소 검색 결과가 없습니다</div>';
+            document.getElementById('stationCount').textContent = '0';
+        }
+        
+        // 페이지 로드 시 샘플 검색
+        window.addEventListener('load', function() {
+            document.getElementById('searchInput').value = '서울';
+            performSearch();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: leddata
+  
+  datasource:
+    url: jdbc:h2:mem:leddata
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+        
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+# 공공 API 설정 (기업 인증키 적용)
+api:
+  weather:
+    service-key: "u6o1xpmT37/owGyLSW0MZ1PPO6j92c+IFaJTlIchc4T8tLZVpbNTDEmHq0AW3i6MkZwc8Nwew7o1kTqKSKcAMQ=="
+    base-url: "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0"
+  air:
+    service-key: "u6o1xpmT37/owGyLSW0MZ1PPO6j92c+IFaJTlIchc4T8tLZVpbNTDEmHq0AW3i6MkZwc8Nwew7o1kTqKSKcAMQ=="
+    base-url: "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
+  forest:
+    service-key: "u6o1xpmT37/owGyLSW0MZ1PPO6j92c+IFaJTlIchc4T8tLZVpbNTDEmHq0AW3i6MkZwc8Nwew7o1kTqKSKcAMQ=="
+    base-url: "https://apis.data.go.kr/1400377/forestPoint"
+
+# 스케줄러 설정
+scheduler:
+  weather:
+    cron: "0 */10 * * * *"  # 10분마다
+  air:
+    cron: "0 */30 * * * *"  # 30분마다
+  forest:
+    cron: "0 0 6 * * *"     # 매일 오전 6시
+
+# 로깅 설정
+logging:
+  level:
+    co.kr.leddata: DEBUG
+    org.springframework.web: DEBUG
+    
+server:
+  port: 8081

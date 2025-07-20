@@ -1,0 +1,162 @@
+{
+  "240025": {
+    "name": "서울시청",
+    "location": {
+      "nx": 60,
+      "ny": 127,
+      "region": "서울특별시",
+      "stationName": "중구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240026": {
+    "name": "부산시청",
+    "location": {
+      "nx": 98,
+      "ny": 76,
+      "region": "부산광역시",
+      "stationName": "연제구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240027": {
+    "name": "대구시청",
+    "location": {
+      "nx": 89,
+      "ny": 90,
+      "region": "대구광역시",
+      "stationName": "중구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240028": {
+    "name": "인천시청",
+    "location": {
+      "nx": 55,
+      "ny": 124,
+      "region": "인천광역시",
+      "stationName": "남동구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240029": {
+    "name": "광주시청",
+    "location": {
+      "nx": 58,
+      "ny": 74,
+      "region": "광주광역시",
+      "stationName": "동구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240030": {
+    "name": "대전시청",
+    "location": {
+      "nx": 67,
+      "ny": 100,
+      "region": "대전광역시",
+      "stationName": "서구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240031": {
+    "name": "울산시청",
+    "location": {
+      "nx": 102,
+      "ny": 84,
+      "region": "울산광역시",
+      "stationName": "중구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240032": {
+    "name": "세종시청",
+    "location": {
+      "nx": 66,
+      "ny": 103,
+      "region": "세종특별자치시",
+      "stationName": "세종"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240033": {
+    "name": "수원시청",
+    "location": {
+      "nx": 60,
+      "ny": 121,
+      "region": "경기도",
+      "stationName": "영통구"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  },
+  "240034": {
+    "name": "춘천시청",
+    "location": {
+      "nx": 73,
+      "ny": 134,
+      "region": "강원도",
+      "stationName": "춘천"
+    },
+    "api": ["weather", "air"],
+    "theme": "default",
+    "service": {
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "state": 0
+    }
+  }
+}

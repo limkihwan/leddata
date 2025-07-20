@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'플레이어 ' + ${playerCode} + ' - 환경정보 디스플레이'">환경정보 디스플레이</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .weather-section {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+        
+        .weather-section .card-title {
+            color: white;
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .air-section {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+        }
+        
+        .air-section .card-title {
+            color: white;
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .temperature {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .air-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .air-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        .air-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .air-grade {
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .update-time {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .player-info {
+            grid-column: 1 / -1;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-buttons {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="player-info">
+            <h1 th:text="'플레이어 ' + ${playerCode}">플레이어 정보</h1>
+            <p>실시간 환경정보 디스플레이</p>
+        </div>
+        
+        <div class="info-card weather-section">
+            <h2 class="card-title">🌤️ 날씨정보</h2>
+            <div class="temperature" th:text="${weather.temperature} + '°C'">20°C</div>
+            <div style="text-align: center; font-size: 20px; margin-bottom: 20px;" 
+                 th:text="${weather.weather}">맑음</div>
+            
+            <div class="weather-details">
+                <div class="detail-item">
+                    <div class="detail-label">습도</div>
+                    <div class="detail-value" th:text="${weather.humidity} + '%'">60%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">풍향</div>
+                    <div class="detail-value" th:text="${weather.windDirection}">북풍</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">풍속</div>
+                    <div class="detail-value" th:text="${weather.windSpeed} + 'm/s'">2.5m/s</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">강수확률</div>
+                    <div class="detail-value" th:text="${weather.rainProbability} + '%'">10%</div>
+                </div>
+            </div>
+            
+            <div class="update-time" th:text="'업데이트: ' + ${weather.updateTime}">
+                업데이트: 2025-07-20 15:30:00
+            </div>
+        </div>
+        
+        <div class="info-card air-section">
+            <h2 class="card-title">🌫️ 대기질정보</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 18px;" th:text="${air.stationName}">측정소명</div>
+                <div style="font-size: 14px; opacity: 0.8;" th:text="${air.region}">지역명</div>
+            </div>
+            
+            <div class="air-grid">
+                <div class="air-item">
+                    <div>미세먼지(PM10)</div>
+                    <div class="air-value" th:text="${air.pm10Value} + 'μg/m³'">30μg/m³</div>
+                    <div class="air-grade" th:text="${air.pm10Grade}">좋음</div>
+                </div>
+                <div class="air-item">
+                    <div>초미세먼지(PM2.5)</div>
+                    <div class="air-value" th:text="${air.pm25Value} + 'μg/m³'">15μg/m³</div>
+                    <div class="air-grade" th:text="${air.pm25Grade}">좋음</div>
+                </div>
+                <div class="air-item">
+                    <div>통합대기환경지수</div>
+                    <div class="air-value" th:text="${air.caiValue}">50</div>
+                    <div class="air-grade" th:text="${air.caiGrade}">보통</div>
+                </div>
+                <div class="air-item">
+                    <div>오존(O₃)</div>
+                    <div class="air-value" th:text="${air.o3Value} + 'ppm'">0.030ppm</div>
+                    <div class="air-grade" th:text="${air.o3Grade}">좋음</div>
+                </div>
+            </div>
+            
+            <div class="update-time" th:text="'업데이트: ' + ${air.updateTime}">
+                업데이트: 2025-07-20 15:30:00
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/player/240025" class="nav-btn">서울</a>
+            <a href="/player/240026" class="nav-btn">부산</a>
+            <a href="/player/240027" class="nav-btn">대구</a>
+            <a href="/player/240028" class="nav-btn">인천</a>
+            <a href="/player/240029" class="nav-btn">광주</a>
+            <a th:href="'/player/refresh/' + ${playerCode}" class="nav-btn" style="background: rgba(255, 255, 255, 0.4);">🔄 새로고침</a>
+            <a href="/admin/search" class="nav-btn" style="background: rgba(0, 255, 0, 0.3);">🔍 지역검색</a>
+            <a href="/admin/config" class="nav-btn" style="background: rgba(255, 165, 0, 0.3);">⚙️ 설정관리</a>
+            <a href="/h2-console" class="nav-btn" target="_blank">DB 확인</a>
+            <a href="/api/status" class="nav-btn" target="_blank">API 상태</a>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        const playerCode = /*[[${playerCode}]]*/ '240025';
+        
+        // 5분마다 데이터 자동 갱신
+        setInterval(function() {
+            fetch(`/api/weather/${playerCode}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        location.reload(); // 간단히 페이지 새로고침
+                    }
+                })
+                .catch(error => {
+                    console.log('데이터 갱신 중 오류:', error);
+                });
+        }, 300000); // 5분
+        
+        console.log('환경정보 서비스 시작됨 - 플레이어:', playerCode);
+    </script>
+</body>
+</html>
